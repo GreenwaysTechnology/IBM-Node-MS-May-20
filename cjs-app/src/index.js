@@ -10,8 +10,13 @@
 //object destructuring
 
 const { id, name, isActive, calculateScore } = require('./mylib')
+const CustomerService = require('./services/CustomerService')
+
 
 console.log(name);
 console.log(id)
 console.log(isActive)
 console.log(calculateScore())
+let service = new CustomerService();
+console.log(service.findAll())
+ 

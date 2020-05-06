@@ -130,6 +130,10 @@ let stockValue = "$1000" // string but value is number
 let totalStockValue = stockValue * 100; //conversion failed,throwing NaN
 console.log(`totalStockValue ${totalStockValue}`)
 
+
+let x = "10";
+let rs = parseInt(x);
+
 //inifity
 let avgDeathRate = 55000 / 0;
 console.log(`avgDeathRate ${avgDeathRate}`)

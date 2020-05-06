@@ -978,16 +978,940 @@ exports.calculateScore = function () {
     return 10;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////
+
+Object augmentation:
+...................
+
+Objects are just simple datastructure ; map.
+
+map -- key ;value
+
+key:value
+property:literal 
+
+since object is ds, you can do some operations
+
+add,delete,update,iterate
+
+//Object augmentation
+//add,remove,update,iterate object 
+
+//empty object
+let product = {};
+
+//add new property
+product.id = 10;
+product.price = 900;
+product.name = 'think pad'
+product.qty = 90;
+
+//update : js engine looks whether property exits or not, if exit update,else add
+product.price = 870;
+
+//remove property
+delete product.qty
+
+//iterate
+//operator to access object properties 
+// . operator : used only for known object property
+// [] operator : used for accessing object property dynamically, which is unknown
+for (const key in product) {
+    console.log(key, product[key]);
+}
+
+
+console.log(product)
+////////////////////////////////////////////////////////////////////////////////////////////
+
+node has in built cjs loader.
+
+browser has no any third loader(cjs,es6...)
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+module.exports
+
+1.which exports code as it is.
+   Which does not add inside any object.
+ if you return a variable, the variable will retuned as it.
+
+2.per file only one module.exports allowed
+
+
+src/data/customer-data.js
+
+
+const CUSTOMERS = [{ id: 1, name: 'A1' },{ id: 2, name: 'A2' }]
+
+module.exports = CUSTOMERS;
+
+src/services/customerservice.js
+
+/**
+ * 
+ * function require(fileName){
+ * 
+ * class CustomerService {
+    constructor() {
+        console.log('constructor is called')
+    }
+    findAll() {
+        return [{ id: 1, name: 'A' }]
+    }
+}
+    return CustomerService;
+ * 
+ * }
+ */
+const CUSTOMERS = require('../data/customer-data');
+
+class CustomerService {
+    constructor() {
+        console.log('constructor is called')
+    }
+    findAll() {
+        return CUSTOMERS;
+    }
+}
+module.exports = CustomerService;
+
+src/index.js
+const { id, name, isActive, calculateScore } = require('./mylib')
+const CustomerService = require('./services/CustomerService')
+
+
+console.log(name);
+console.log(id)
+console.log(isActive)
+console.log(calculateScore())
+let service = new CustomerService();
+console.log(service.findAll())
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+What is node.js
+
+Node is javascript platform and runtime to run javascript programms.
+
+Js language features:
+
+javascript is async programming language.
+
+concurrency
+  -doing multiple things at the same time.
+threading : sub process
+if you run many task at the same time-multi threading.
+
+Does js support multithreading?
+ No!--js single thread engine.
+
+how to implement in concurrency in js?
+
+runtime architecture
+
+what is runtime ?
+  program in excution => process.
+
+program types:
+
+1.passive program  
+  the program which is not in main memory.
+  the program which is main memory but not accessed by cpu.
+
+2.active program
+
+ the program which is in main memory accessed by cpu
+ active program is other wise called process.
+
+Point:
+
+Any thing(program) inside ram will have structure.
+
+Process structure====>runtime structure===> js engine structure==> Node structure
+
+heap 
+  dynamic memory segment used to allocate memory on fly for the running programms
+stack
+  dynamic memory segment used to allocate memory for "methods/functions"
+program data
+ -common passive data for running process
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+stack:
+
+function  sayHello(){
+ ///logic 
+  let name ='subramanian'
+}
+
+//Objective of function call
+//to perform task , who will perform task=>cup
+//cup will communicate always RAM
+
+function call means , moving function to ram,Any thing(program) inside ram will have structure.
+i need function structure, who will create/allocate function structure ?
+       "stack"
+sayHello();
+
+How many frames can be run at the same time?
+
+in general , you can run only one active frame.
+
+can i run/create multiple frames?
+
+Yes!....
+
+what is frame?
+  -thread
+
+can i run multiple frames(threads) in javascript?
+
+ No,
+
+then how i can achive concurrency.
+
+--->Worker-thread Model/
+--->Event--Loop architecture/
+--->Reactor Model/
+/////////////////////////////////////////////////////////////////////////////////////
+
+Sync Programming : single frame architecture
+
+only one frame can be executed
+while running one frame, other functions has to wait => "Blocking"
+
+//blocking /sync programming
+
+function sayHello() {
+    console.log('hello');
+}
+function add(a = 1, b = 2) {
+    let c = a + b;
+    console.log(c);
+}
+//invoke functions
+//sayhello---stack---frame is created---running|once done--frame is removed 
+sayHello() 
+//add--stack--frame is created---running|once done--frame is removed
+add(10, 10);
+//////////////////////////////////////////////////////////////////////////////////////////
+
+What is the problems single frame arch?
+
+ -frame takes longer time to complete, other programs will wait: blocking
+
+frames should block other programs : Non blocking
+
+ Async Progamming ;concurrency architecture
+
+Async architecture is designed based on one design pattern "Reactor Design Pattern"
+
+Worker-thread Model : dont create frame(thread) at the process level
+
+funcall()-------stack---|---------------os kernal--thread is running--
+
+
+how data is returned to end users once the task is completed?
+
+  "Event driven architecture"
+
+  Signal : completed,connected,closed......
+
+
+Event Queue(Task Queue)
+  It is data structure which has completed job references in the form of functions
+    - callback functions : handler function :==>will have data to be retuned to end user
+
+
+Event loop
+    It is program which keeps on checking the queue whether any message should be
+   processed : for what , in order to send results back to clients.
+
+
+funcall()-------stack---|---------------os kernal--thread is running--Completed-->push into
+ Event Queue---Event loop process message---check whether statck is empty or not--if empty--
+push callback function --send results back to end clients.
+
+
+Networking: Blocking Servers : http
+
+use case is to read file
+
+c1 asks 1 gb file
+
+c1----request-----------Webserver---createthread---read file(long running process)
+c2----request-----------Webserver---createthread---read file(long running process)
+c3----request-----------Webserver---createthread---read file(long running process)
+c4----request-----------Webserver---createthread---read file(long running process)
+c5----request-----------Webserver---createthread---read file(long running process)
+c6----request-----------Webserver---createthread---read file(long running process)
+c7----request-----------Webserver---createthread---read file(long running process)
+c8----request-----------Webserver---createthread---read file(long running process)
+c9----request-----------Webserver---createthread---read file(long running process)
+c10----request-----------Webserver---createthread---read file(long running process)
+
+Webserver:
+1.create thread
+2.read operations :IO --BLOCKING IO operations
+3.once done , remove threads
+
+problems
+
+1.dead lock
+2.resource utilation
+3.race conditions
+
+
+Networking: NonBlocking Servers(async) : http
+
+use case is to read file
+
+c1 asks 1 gb file                                     os kernal
+
+c1----request-----------Webserver---|      createthread---read file(long running process)
+c2----request-----------Webserver---|     createthread---read file(long running process)
+c3----request-----------Webserver---|      createthread---read file(long running process)
+c4----request-----------Webserver---|     createthread---read file(long running process)
+c5----request-----------Webserver---| --  createthread---read file(long running process)
+c6----request-----------Webserver---|     createthread---read file(long running process)
+c7----request-----------Webserver---|      createthread---read file(long running process)
+c8----request-----------Webserver---|      createthread---read file(long running process)
+c9----request-----------Webserver---|     createthread---read file(long running process)
+c10----request-----------Webserver--|     createthread---read file(long running process)
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Node is platform: it is not only runtime.
+
+Node is collection of many compoents.
+
+Javascript runtime:
+Node has been built on google javascript runtime called "V8"
+
+V8 has :
+ stack
+ heap
+
+Lib :libuv
+
+ibuv is a multi-platform support library with a focus on asynchronous I/O.
+
+
+Node binding layer:
+
+ it is low level c lib.
+
+Node binding layer : high level
+
+ it is javascript api layer.
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Why node was created? What type of problems node is going to solve?
+
+
+javascript is created only for manipulating documents==DOM programming.
+
+Ryan Dahl who understand the power of js language, but language had limitions
+
+js cant be used to build io applications =network application where we require high conncurrency.
+
+Single thread, event driven, non blocking network application(http,tcp,udp) if you want to build,Who decided to build javascript based architecture to build non blocking "io/network application"
+  That is brith of NODE.JS project.
+
+
+Ryan added network related apis from "libuv" + javascript apis from js language
+
+
+Node offers
+Full-featured event loop backed by epoll, kqueue, IOCP, event ports.
+Asynchronous TCP and UDP sockets
+Asynchronous DNS resolution
+Asynchronous file and file system operations
+File system events
+ANSI escape code controlled TTY
+IPC with socket sharing, using Unix domain sockets or named pipes (Windows)
+Child processes
+Thread pool
+Signal handling
+High resolution clock
+Threading and synchronization primitives
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+Node Programming:
+
+1.Async programming and implementation
+
+2.Node io programming
+
+3.npm
+
+4.web programming
+
+5.Microservices Programming.
+
+
+
+Async programming:
+
+
+function sayHello() {
+    console.log('hello');
+}
+
+sayHello() 
+
+is the above code is async or not?
+ No!.
+
+how to know which is async?
+
+1.the api(function) which you use should be part of libuv lib
+refer doc:
+common async api
+
+1.timers
+  settimeout,setinterval,setImmediate
+2.node fs api (file system) : read and write
+3.node networking apis : to write network applications
+4.js apis
+  Promise,async await
+etc....
+
+2.you must have callback function(handler function) 
+   The function to be called by event loop once event is emitted by os.
+
+callback function : function as parameter.
+
+async api ====> {function as prop + high level async api binding}
+
+                             "All api not async apis"
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+Async implementation:
+
+timers:
+//async programming :timers
+
+function hello() {
+    console.log('hello')
+}
+
+hello();
+//async
+
+// setTimeout(function () {
+//     console.log('i am delayed')
+// }, 1000);
+
+setTimeout(() => {
+    console.log('i am delayed')
+}, 1000);
+
+const callback = function () {
+    console.log('i am delayed 2')
+
+}
+setTimeout(callback, 3000);
+
+hello()
+console.log('something ...')
+///////////////////////////////////////////////////////////////////////////////
+// function connect(cb) {
+//     //timer
+//     // setTimeout(cb, 1000); 
+//     setTimeout(() => {
+//         cb();
+//     }, 1000)
+// }
+// connect(() => {
+//     console.log('HTTP server')
+// })
+//after time out , i want to return data
+function connect(cb) {
+    //timer
+    // setTimeout(cb, 1000); 
+    let fakeData = 'Web Server';
+
+    setTimeout(() => {
+        cb(fakeData);
+    }, 1000)
+    //setTimeout(cb, 1000, fakeData);
+}
+//connect(func)===>stack==>excution starts===setTimeout---|never creates--
+//|register callback---move control to libuv| control is returned to main process
+//js engine
+
+//libuv---will schedule the job in os | thread is running---emit event(timer)--->
+//libuv(event queue)----loop runs--check whether current stack is empty--if yes
+//then push into stack==>frame is created==>result is returned to client
+connect(message => {
+    console.log(message)
+})
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+patterns to write async programming:
+....................................
+
+1.callback pattern
+
+2.Promise pattern
+
+3.promise + async and await
+
+
+1.callback pattern:
+
+it is core pattern, without this , we cant implement async programming.
+
+//async programming patterns:
+
+
+//callback based
+//In any application, we need to handle errors.
+//how to handle errors in async programming
+
+// success,failure ===>resolve and reject
+
+// const getUser = callback => {
+//     let fakeData = {
+//         id: 1,
+//         name: 'admin'
+//     }
+//     setTimeout(callback, 1000, fakeData);
+// }
+// //get User 
+// getUser(user => {
+//     console.log(user)
+// });
+
+
+// biz logic with success and failure
+
+const getUser = (resolve, reject) => {
+    let fakeData = {
+        id: 1,
+        name: 'admin'
+    }
+   // let fakeData = null;//false
+    //biz logic
+    if (fakeData) {
+        setTimeout(resolve, 1000, fakeData);
+    } else {
+        setTimeout(reject, 1000, { code: 500, message: 'User not found' });
+    }
+}
+//get User 
+getUser(user => console.log(user), err => console.log(err));
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+nested callabacks:
+
+the out put of one callback , will become input to another callback ; callback nesting.
+
+use case;
+
+ getuser------data- success
+    |		|
+ failed		login -success  
+   |             |
+rejection    failed     |
+              |	      show login page
+              reject
+
+
+//async programming patterns:
+
+
+//callback based
+//In any application, we need to handle errors.
+//how to handle errors in async programming
+
+// success,failure ===>resolve and reject
+
+// const getUser = callback => {
+//     let fakeData = {
+//         id: 1,
+//         name: 'admin'
+//     }
+//     setTimeout(callback, 1000, fakeData);
+// }
+// //get User 
+// getUser(user => {
+//     console.log(user)
+// });
+
+
+// biz logic with success and failure
+
+const getUser = (resolve, reject) => {
+    let fakeData = {
+        id: 1,
+        name: 'admin'
+    }
+    // let fakeData = null;//false
+    //biz logic
+    if (fakeData) {
+        setTimeout(resolve, 1000, fakeData);
+    } else {
+        setTimeout(reject, 1000, { code: 500, message: 'User not found' });
+    }
+};
+
+const login = (user, resolve, reject) => {
+    //biz logic
+    if (user.name === 'admin') {
+        setTimeout(resolve, 1000, { code: 200, message: 'Login Success' });
+    } else {
+        setTimeout(reject, 1000, { code: 500, message: 'Login failed' });
+
+    }
+};
+
+const showPage = (loginStatus, resolve, reject) => {
+    //biz
+    if (loginStatus.code === 200) {
+        setTimeout(resolve, 1000, 'You are Administrator');
+    } else {
+        setTimeout(reject, 1000, 'You are not Administrator');
+    }
+}
+
+
+
+//get User 
+//getUser(user => console.log(user), err => console.log(err));
+
+getUser(user => {
+    //call login function with three parameters
+    login(user, status => {
+        showPage(status, isAdmin => {
+            console.log(isAdmin)
+        }, err => console.log(err));
+    }, err => console.log(err));
+}, err => console.log(err));
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Callback Hell:
+.............
+
+look at the above function call, ask your self
+
+Questions:
+
+1.Whether this code is able to understand quickly
+2.Whether this code is able to debug
+3.Whehter this code is scalable?
+4.whether this code is maintaiable?
+
+  "No" : This is what we call as "Callback hell"
+
+Callback hell is not error, but way of writing async programming using nested callback.
+
+
+fs.readdir(source, function (err, files) {
+  if (err) {
+    console.log('Error finding files: ' + err)
+  } else {
+    files.forEach(function (filename, fileIndex) {
+      console.log(filename)
+      gm(source + filename).size(function (err, values) {
+        if (err) {
+          console.log('Error identifying file size: ' + err)
+        } else {
+          console.log(filename + ' : ' + values)
+          aspect = (values.width / values.height)
+          widths.forEach(function (width, widthIndex) {
+            height = Math.round(width / aspect)
+            console.log('resizing ' + filename + 'to ' + height + 'x' + height)
+            this.resize(width, height).write(dest + 'w' + width + '_' + filename, function(err) {
+              if (err) console.log('Error writing file: ' + err)
+            })
+          }.bind(this))
+        }
+      })
+    })
+  }
+})
+
+           "callback hell is other wise called as doom of pyrbid."
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+How to write better callback programming? or How to avoid callback hell?
+
+Solution : One Design pattern is 
+
+
+In 2005, JQUERY team started with working complex callback patterns, they found callback
+hell problem.
+
+They proposed a  Design pattern to write better callback programming(Async) programming.
+
+  "promise".
+
+
+Promise is design pattern which hides complexity of callback patterns.
+
+SInce Promise is design pattern, many people have implemented Promise design pattern.
+
+1.JQuery -first promise implementation
+2.many libs and frameworks
+
+Because of popularty of this design among javascript developers, ECMA 6 Committee introduced
+"promise design pattern in ES6 as Promise"
+
+Promise Object is reference implementation of "promise design pattern".
+
+Js has lot of built in objects
+
+Object
+Wrapper Objects: Number,String,Boolean
+Math
+Date
+JSON --Parser Object
+Promise
+
+features of Promise Object:
+
+1.Promise by deafult is Async. Which implements timer api with 0 ms .
+
+2.Promise can be used with any async implementations.
+
+
+Promise Implemenation / Promise Objects:
+........................................
+
+1. Create Promise Object from Promise contructor
+        new Promise()
+2. Create Promise object from factory apis
+   ClassName.getInstance()===Object
+	Promise.resolve() ==>Promise
+        Promise.reject() ===>Promise
+
+
+Promise object methods:
+1.then - success
+2.catch - errors
+3.finally - clean up
+4.resolve
+5.reject
+6.all
+7.race
+///////////////////////////////////////////////////////////////////////////////////////////
+
+                   When to use factory api and when to use constructor 
+				to create Promise Object
+
+
+
+//Promises
+
+//Create Promise Object using factory apis
+//Promises are by default async
+const { log } = console;
+
+//resolve
+function getSuccess() {
+    //return promise Object
+    return Promise.resolve('Success');//New Promise Object
+}
+log('start')
+// let result = getSuccess();
+// //to get output
+// result.then(res => console.log(res));
+//code : builder pattern or command chain pattern
+//"hello".toLocaleLowerCase().toUpperCase().trim()
+//getSuccess().then(res => console.log(res));
+
+//if single variable , that are going to print, you need not declare that variable
+//getSuccess().then(console.log);
+getSuccess().then(log);
+
+log('end');
 
 
 
 
 
+const { log } = console;
+const getUser = () => {
+    let fakeData = {
+        id: 1,
+        name: 'admin'
+    }
+    // let fakeData = null;//false
+    //biz logic
+    if (fakeData) {
+        // setTimeout(resolve, 1000, fakeData);
+        return Promise.resolve(fakeData);
+    } else {
+        // setTimeout(reject, 1000, { code: 500, message: 'User not found' });
+        return Promise.reject({ code: 500, message: 'User not found' });
+    }
+};
+
+const login = user => {
+    //biz logic
+    if (user.name === 'admin') {
+        // setTimeout(resolve, 1000, { code: 200, message: 'Login Success' });
+        return Promise.resolve({ code: 200, message: 'Login Success' });
+
+    } else {
+        // setTimeout(reject, 1000, { code: 500, message: 'Login failed' });
+        return Promise.reject({ code: 500, message: 'Login failed' });
+
+    }
+};
+
+const showPage = loginStatus => {
+    //biz
+    if (loginStatus.code === 200) {
+        //setTimeout(resolve, 1000, 'You are Administrator');
+        return Promise.resolve('You are Administrator');
+
+    } else {
+        // setTimeout(reject, 1000, 'You are not Administrator');
+        return Promise.reject('You are not Administrator');
+
+    }
+}
+//
+// getUser(user => {
+//     //call login function with three parameters
+//     login(user, status => {
+//         showPage(status, isAdmin => {
+//             console.log(isAdmin)
+//         }, err => console.log(err));
+//     }, err => console.log(err));
+// }, err => console.log(err));
+
+// getUser()
+//     .then(user => {
+//         return login(user) //returns promise
+//     })
+//     .then(status => {
+//         return showPage(status) //returns Promise
+//     })
+//     .then(log)
+//     .catch(log)
+//     .finally(() => console.log('Program is terminted'))
+
+
+getUser()
+    .then(user => login(user))//returns promise
+    .then(status => showPage(status)) //returns Promise
+    .then(log)
+    .catch(log)
+    .finally(() => console.log('Program is terminted'))
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Promise Constructor:
+
+1. if you want to convert any callback based aync application
+
+
+Use case 1 : i want to wrap timer with promise.
+...............................................
+
+//Promise constructor 
+
+const { log } = console;
+
+const getUser = () => {
+
+    return new Promise((resolve, reject) => {
+        //biz logic
+        let fakeUser = {
+            id: 1,
+            name: 'admin'
+        }
+        if (fakeUser) {
+            setTimeout(resolve, 1000, fakeUser);
+        } else {
+            setTimeout(reject, 1000, { code: 500, message: 'Error' })
+        }
+
+    });
+
+}
+getUser()
+    .then(log)
+    .catch(log)
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+mock data 
+
+src/data/todos.js
+
+please refer this url and copy and paste into this file
+https://jsonplaceholder.typicode.com/todos
+
+src/services/todoservice.js
+const TODOS = require('../data/todos');
+
+
+class TodoService {
+    constructor() {
+    }
+    //sync api
+    // findAllTodo() {
+    //     return TODOS;
+    // }
+    //async code : with callbacks
+    // findAllTodo(callback) {
+    //     setTimeout(callback, 1000, TODOS)
+    // }
+
+    //async code : with promise
+    findAllTodo() {
+        return new Promise((resolve, reject) => {
+            //async
+           //any legacy async api with callback
+           setTimeout(resolve, 1000, TODOS)
+        })
+    }
+}
+module.exports = new TodoService();
 
 
 
+src/todoapp.js
+const { findAllTodo } = require('./services/TodoService');
 
+const { log } = console;
 
+function fetchAllTodos() {
+
+    //sync call
+    //findAllTodo().forEach(log)
+    //async call :using callbacks
+    // findAllTodo(todos => {
+    //     todos.forEach(log);
+    // });
+    //async call : using Promises
+    findAllTodo().then(todos => {
+        todos.forEach(log);
+    });
+}
+
+//call
+fetchAllTodos();
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
+Promise Hell:
+............
+
+How to solve promise?
 
 
 
