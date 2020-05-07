@@ -2,18 +2,24 @@ const { findAllTodo } = require('./services/TodoService');
 
 const { log } = console;
 
-function fetchAllTodos() {
+async function fetchAllTodos() {
 
     //sync call
     //findAllTodo().forEach(log)
     //async call :using callbacks
-    // findAllTodo(todos => {
+
+    //async call : using Promises
+    // findAllTodo().then(todos => {
     //     todos.forEach(log);
     // });
-    //async call : using Promises
-    findAllTodo().then(todos => {
+    //async call : using promise +
+    try {
+        const todos = await findAllTodo()
         todos.forEach(log);
-    });
+    }
+    catch (err) {
+        log(err)
+    }
 }
 
 //call

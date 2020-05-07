@@ -1914,6 +1914,1200 @@ Promise Hell:
 How to solve promise?
 
 
+if you handle promises with nested way, it also creates complexity, this is called promise hell.
+
+we are going to use promise but we are going to simplify promise handling.
+
+getUser()
+    .then(user => login(user))//returns promise
+    .then(status => showPage(status)) //returns Promise
+    .then(log)
+    .catch(log)
+    .finally(() => console.log('Program is terminted'))
+
+How we can remove this code? 
+
+async and await keywords
+
+async is keyword used in front function : async functions
+
+
+//async await 
+
+
+const { log } = console
+
+//Service api
+const getUser = () => {
+    let fakeData = {
+        id: 1,
+        name: 'admin'
+    }
+    // let fakeData = null;//false
+    //biz logic
+    if (fakeData) {
+        // setTimeout(resolve, 1000, fakeData);
+        return Promise.resolve(fakeData);
+    } else {
+        // setTimeout(reject, 1000, { code: 500, message: 'User not found' });
+        return Promise.reject({ code: 500, message: 'User not found' });
+    }
+};
+
+const login = user => {
+    //biz logic
+    if (user.name === 'admin') {
+        // setTimeout(resolve, 1000, { code: 200, message: 'Login Success' });
+        return Promise.resolve({ code: 200, message: 'Login Success' });
+
+    } else {
+        // setTimeout(reject, 1000, { code: 500, message: 'Login failed' });
+        return Promise.reject({ code: 500, message: 'Login failed' });
+
+    }
+};
+
+const showPage = loginStatus => {
+    //biz
+    if (loginStatus.code === 200) {
+        //setTimeout(resolve, 1000, 'You are Administrator');
+        return Promise.resolve('You are Administrator');
+
+    } else {
+        // setTimeout(reject, 1000, 'You are not Administrator');
+        return Promise.reject('You are not Administrator');
+
+    }
+}
+
+//Controller api
+async function UserController() {
+
+    // getUser()
+    //     .then(log)
+    //     .catch(log)
+    //     .finally(() => console.log('finally'))
+
+    // getUser()
+    // .then(user => login(user))//returns promise
+    // .then(status => showPage(status)) //returns Promise
+    // .then(log)
+    // .catch(log)
+    // .finally(() => console.log('Program is terminted'))
+
+    getUser()
+    .then(user => login(user))//returns promise
+    .then(status => showPage(status)) //returns Promise
+    .then(log)
+    .catch(log)
+    .finally(() => console.log('Program is terminted'))
+
+
+    try {
+        const user = await getUser() // then
+        const status = await login(user) //then
+        const page = await showPage(status); //then
+        console.log(page);
+    }
+    catch (err) { // .catch
+        log(err)
+    }
+    finally {
+        log('Program terminiated')
+    }
+
+}
+UserController();
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Node topics;
+
+1.how to run js code on node
+
+1.node program.js
+2.node REPL- Read Evulate print loop
+
+
+Node and javascript objects:
+............................
+
+javascript offers lot of built in objects
+
+pojo
+ Math
+ Object
+ Date
+ JSON
+ wrapper objects Number,String,Boolean
+ ........
+dom objects
+ HtmlDocument - document
+ Window
+ History
+ any html elements
+
+dom related object not supported in node.
+
+
+Point:
+
+1.in browser window is global object.
+
+2. in node "Process" is global object
+
+
+//Adding env variable in programm
+
+//get process object and set variable
+
+process.env.mode = "Dev";
+//process.env.port = 8080;
+const port  = process.env.port || 9090
+console.log(process.env.mode)
+console.log(port)
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Node and Modularity:
+....................
+
+node is highly modular platform, you can write modular applications
+node by default supports cjs module system.
+
+in node module is called "node module'
+
+
+Types of modules:
+
+1.Custom module
+  Written you , eg: OrderController....
+  exports,module.exports
+2.in built modules
+   Modules are supplied by node , which are supplied during node installation.
+3.Third party modules
+   provided by third parties, like frameworks,libs etc...
+
+
+
+1.Custom module : discussed already.
+
+2.in built modules
+
+
+In built Modules:
+
+1.OS
+ Operating system information
+
+//import os module
+const {arch,cpus} = require('os');
+
+//os system information
+
+const { log } = console;
+
+log('os information')
+log(arch())
+log(cpus())
+
+
+ require('./OrderRepository');
+  ->here you can see ./
+  ./ -current dir
+ require('os'); => 
+  -here no ./ 
+
+ Why?
+
+Note : if you are java devp, you know the classpath , how it works?
+
+require('os');
+ if you dont tell with './'
+    Node internally uses a search algorthim,node always looks the folder called
+ "node_modules" in the current project, if not , then it searches, the node in built installtion folder---c:/pf/node/node_nodules--if it finds it will pick up from there else it will throw error.
+
+ os--local node_module foder
+		if not
+		   c/pf/node_module
+			load from there
+
+
+if module not found , node will throw error
+internal/modules/cjs/loader.js:800
+    throw err;
+    ^
+
+Error: Cannot find module 'osccc'
+Require stack:
+- C:\session\ibm\mynode-app\src\index.js
+[90m    at Function.Module._resolveFilename (internal/modules/cjs/loader.js:797:15)[39m
+[90m    at Function.Module._load (internal/modules/cjs/loader.js:690:27)[39m
+[90m    at Module.require (internal/modules/cjs/loader.js:852:19)[39m
+[90m    at require (internal/modules/cjs/helpers.js:74:18)[39m
+    at Object.<anonymous> (C:\session\ibm\mynode-app\src\index.js:2:21)
+[90m    at Module._compile (internal/modules/cjs/loader.js:959:30)[39m
+[90m    at Object.Module._extensions..js (internal/modules/cjs/loader.js:995:10)[39m
+[90m    at Module.load (internal/modules/cjs/loader.js:815:32)[39m
+[90m    at Function.Module._load (internal/modules/cjs/loader.js:727:14)[39m
+[90m    at Function.Module.runMain (internal/modules/cjs/loader.js:1047:10)[39m {
+  code: [32m'MODULE_NOT_FOUND'[39m,
+  requireStack: [ [32m'C:\\session\\ibm\\mynode-app\\src\\index.js'[39m ]
+
+
+//import os module
+const {arch,cpus} = require('os');  //load from node_modules folder
+const {findAll} = require('./services/TodoService') //load from current project dir
+
+//os system information
+
+const { log } = console;
+
+log('os information')
+log(arch())
+log(cpus())
+///////////////////////////////////////////////////////////////////////////////////////////
+
+EventEmitter: How to write event driven programming.
+
+ It is used to build driven programming.
+ In node js most io applications are event driven.
+
+Here we are going to talk how to write custom events.
+
+
+//event driven programming
+const EventEmitter = require('events') //returns function/class
+const { log } = console;
+/**
+ * Event driven programming actors
+ *  1.publisher
+ *     publish data , send signal(event) when certain activity is finished
+ *  2.consumer/listener
+ *    listens for data , data is available based on event published
+ */
+
+//Create EventEmitter object
+const emitter = new EventEmitter();
+
+//Register subscribers
+emitter.on('greet', function (data) {
+    log(data)
+});
+
+//publisher: emit event(greet event),send data
+setTimeout(() => {
+    emitter.emit('greet', 'Welcome')
+}, 1000)
+//////////////////////////////////////////////////////////////////////////
+
+class TriggerService extends EventEmitter {
+    constructor() {
+        super();
+        //Register subscribers
+        this.on('warning', function (data) {
+            log(data)
+        });
+    } 
+    trigger(message) {
+        //emit some event
+        this.emit('warning', message);
+    }
+}
+let triggerService = new TriggerService();
+setTimeout(() => {
+    triggerService.trigger('Stay Home,Save Life')
+}, 2000)
+
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
+Async Programming in IO: Non blocking IO:
+
+IO : INPUT AND OUTPUT =>READ AND WRITE
+
+int a =10; //in memory : write : writing 10 value into a'address
+log a =>read
+
+IO is every where.
+
+IN general all pl, uses blocking/sync mode of reading and writing.
+in java, java creates a thread to read or write
+ web programming , tomcat creates thread to handle request-response -(io)
+         request -- read
+         response - write
+where as non blocking arch(nodejs,vertx), to read and write ,done by os kernal threads
+
+Node non blocking io apis
+
+1.fs io
+   -files system 
+2.network io
+  -http : web apps
+  -tcp
+  -udp
+
+
+
+const fs = require('fs');
+
+
+
+const path = './src/assets/info.txt';
+const config = {
+    encoding: 'UTF-8'
+}
+
+class FileService {
+    constructor() {
+
+    }
+    //api callback based file read api
+    fetchFileContent(handler) {
+        fs.readFile(path, config, handler);
+    }
+    fetchFileContentPromise() {
+
+        //return promise
+        return new Promise((resolve, reject) => {
+
+            fs.readFile(path, config, (err, data) => {
+
+                if (err) {
+                    reject(err);
+                }
+                resolve(data);
+
+            });
+        });
+    }
+}
+
+module.exports = new FileService();
+
+
+const { fetchFileContent, fetchFileContentPromise } = require('./services/FileService');
+
+
+const { log } = console;
+
+//method : callback driven
+function fetchFileCallback() {
+    log('callback based')
+    fetchFileContent((err, data) => {
+        if (err) throw err;
+        console.log(data);
+    });
+}
+function fetchFilePromise() {
+    log('promise based')
+    fetchFileContentPromise()
+        .then(log)
+        .catch(log)
+        .finally(() => log('file operation done!'))
+}
+async function fetchFileAsync() {
+    log('async await based')
+    try {
+        const filecontent = await fetchFileContentPromise()
+        log(filecontent);
+    }
+    catch (err) {
+        log(err)
+    }
+    finally {
+        log('file operation done!')
+    }
+
+}
+
+fetchFileCallback();
+fetchFilePromise()
+fetchFileAsync();
+///////////////////////////////////////////////////////////////////////////////////////
+
+how to write file
+
+//fs.js : non block io
+const fs = require('fs');
+
+//write file
+const writeFilepath = './src/assets/info-copy.txt';
+
+const data = 'This is node IO file!';
+
+console.log('start')
+
+fs.writeFile(writeFilepath, data, function (err) {
+    if (err) throw err;
+    console.info(`The file ${writeFilepath} has been written!`)
+});
+console.log('end')
+///////////////////////////////////////////////////////////////////////////////////////
+
+Does node support blocking IO?
+
+Blocking io means
+
+  readFile----stackframe --read file
+
+All blocking io operations are handled by libuv thread pools.
+ when you read, node will assign a thread  to read / write file.
+
+Note:
+1.Dont use blocking io apis for big files
+2.Dont use blocking io apis in network applications.
+3.Node supports only disk file io in blocking mode, not network apis
+
+
+Blocking io dont have callbacks.
+
+
+Node blocking io Operations:
+.........................
+
+fs.readFileSync()
+fs.writeFileSync()
+
+const fs = require('fs');
+
+const filePath = './src/assets/info.txt';
+const config = {
+    encoding: 'UTF-8'
+}
+
+console.log('start');
+const data = fs.readFileSync(filePath, config);
+console.log(data);
+console.log('end')
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+Global Variables:
+
+1.__dirname
+      ->Get current dir path
+2.__filename
+     ->Get current dir + path__filename
+     ->Get current dir + path
+
+
+Use Case:
+  current dir + fileName
+	dir/src + fileName
+
+//fs.js : non block io
+const fs = require('fs');
+const path = require('path');
+
+/* console.log(__dirname)
+console.log(__filename) */
+
+path module
+The path module provides utilities for working with file and directory paths in platform
+independant way.
+
+const fs = require('fs');
+const path = require('path');
+
+
+console.log(__dirname)
+console.log(__filename)
+
+//const filePath = './src/assets/info.txt';
+//const filePath = __dirname + '/assets/info.txt';
+const filePath = path.join(__dirname,'assets/info.txt')
+const config = {
+    encoding: 'UTF-8'
+}
+
+console.log('start');
+const data = fs.readFileSync(filePath, config);
+console.log(data);
+console.log('end')
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Async io operations can be done two ways.
+
+1.Non-Streaming
+2.Streaming  : Evented IO : Event driven IO.
+
+Non Streaming IO : read / write
+
+non streaming vs streaming:
+
+The operating system completes the whole file read operation, sends to node process memory  , and finally will be delivered to user
+  if more files , then process will be halt.
+
+Non streaming apis are not suitable for network concurrent file operations.
+
+What is the solution?
+
+Streaming
+
+Packet===breaking content into smaller units each unit is called packet.
+
+node breaks content into smaller unit called "chunk"
+node streams /send data in order chunk by chunk.
+
+
+
+Types of Streams:
+
+1.Readaable Stream : input
+2.Writeable stream : output
+3.Duplex stream : read + output
+
+
+Built in readable Streams:
+
+HTTP responses, on the client
+HTTP requests, on the server
+fs read streams
+zlib streams
+crypto streams
+TCP sockets
+child process stdout and stderr
+process.stdin
+
+Writable Streams:
+
+HTTP requests, on the client
+HTTP responses, on the server
+fs write streams
+zlib streams
+crypto streams
+TCP sockets
+child process stdin
+process.stdout, process.stderr
+
+All streaming apis are powered with events
+node io streams has built in events.
+events are emitted by node.
+Our programs are listeners
+
+
+common events in all io
+
+data event:
+ which is emitted by node, for each chunk.
+
+close event:
+The 'close' event is emitted when the stream and any of its underlying resources (a file descriptor, for example) have been closed.
+
+end event:
+The 'end' event is emitted when there is no more data to be consumed from the stream.
+
+Event: 'error'
+ The 'error' event may be emitted by a Readable implementation at any time
+Typically, this may occur if the underlying stream is unable to generate data due to an underlying internal failure, or when a stream implementation attempts to push an invalid chunk of data.
+
+//how to read /write file using streams
+//streams are powered events : evented io
+const fs = require('fs')
+const path = require('path');
+const { log } = console;
+
+const fileName = path.join(__dirname, 'assets/info.txt');
+const config = {
+    encoding: 'UTF-8'
+}
+//read stream
+const inputStream = fs.createReadStream(fileName, config);
+
+//where we have to read data ? inside data event or end
+
+//data event is emitted by os for each chunk of data
+let data = ''
+inputStream.on('data', function (chunk) {
+    log(`Received ${chunk.length} bytes of data.`)
+    data += chunk;
+})
+
+//end event is called , no more chunk of data is availble.
+inputStream.on('end', function () {
+    log('There will be no more data to read!');
+    log(data);
+})
+
+//error event: for error handling
+inputStream.on('error', function (err) {
+    log(`Some thing went wrong! ${err}`)
+});
+//////////////////////////////////////////////////////////////////////////////////////////////
+const fs = require('fs');
+const path = require('path');
+
+const fileName = path.join(__dirname, 'assets/grains.txt');
+const config = {
+    encoding: 'utf8',
+    flag: 'w'
+};
+const grains = ['wheat', 'rice', 'oats'];
+
+const outputStream = fs.createWriteStream(fileName, config);
+
+while (grains.length) {
+    let data = grains.pop() + " ";
+    outputStream.write(data);
+    console.log("Wrote: %s", data);
+}
+outputStream.close();
+
+outputStream.on('close', function () {
+    console.log('file has been closed ')
+});
+////////////////////////////////////////////////////////////////////////////////////////////
+
+How to read from one file and write into file? ===> Read + Write
+
+//Read + write : simple eg:
+//read + write
+const fs = require('fs');
+const path = require('path');
+
+//read
+const inputfileName = path.join(__dirname, 'assets/info.txt');
+//write
+const outputFileName = path.join(__dirname, 'assets/greeter.txt');
+
+const config = {
+    encoding: 'UTF-8'
+}
+
+const inputStream = fs.createReadStream(inputfileName, config);
+const outputStream = fs.createWriteStream(outputFileName, config);
+
+//Register data event.
+inputStream.on('data', function (chunk) {
+    console.log(`Received ${chunk.length} bytes of data.`);
+    console.log(chunk);
+    outputStream.write(chunk);
+});
+
+
+//end event
+inputStream.on('end', function () {
+    console.log('There will be no more data to read!');
+    outputStream.close();
+})
+
+//error event: for error handling
+inputStream.on('error', function (err) {
+    console.log(`Some thing went wrong! ${err}`)
+});
+
+outputStream.on('close', function () {
+    console.log(`File write operation is completed`);
+});
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Back Pressure:
+..............
+Problems when you do read and write together
+
+1. In general read operation is faster than write operation
+
+
+Back Pressure means inputstream is fast, outputstream slow, then data will be
+lost.
+
+
+Handling back pressure:
+.......................
+Pause Input stream if the Node Process memory is full(Buffer),resume if buffer/process memory is empty.
+
+stream.pause() if stream is full
+else
+stream.resume() if stream is drain
+
+big file creation:
+const fs = require('fs');
+const path = require('path')
+
+const filePath = path.join(__dirname, "assets/big.file")
+const file = fs.createWriteStream(filePath);
+
+for (let i = 0; i <= 1e6; i++) {
+    file.write('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n');
+}
+
+file.end();
+
+
+
+back pressure:
+const fs = require('fs');
+const path = require('path');
+
+const inputfileName = path.join(__dirname, 'assets/big.file');
+const outputfileName = path.join(__dirname, 'assets/big_copy.file');
+
+const config = {
+    encoding: 'UTF-8'
+}
+
+//Back pressure handling
+const readerStream = fs.createReadStream(inputfileName, config);
+const writeStr = fs.createWriteStream(outputfileName, config);
+
+readerStream.on('data', function (chunk) {
+    console.log(`Received ${chunk.length} bytes of data.`);
+
+    let buffer_good = writeStr.write(chunk);
+
+    if (!buffer_good) readerStream.pause();
+});
+writeStr.on('drain', function () {
+    console.log('buffer drained!');
+    readerStream.resume();
+});
+
+readerStream.on('end', function () {
+    //console.log(data);
+});
+
+readerStream.on('error', function (err) {
+    console.log(err.stack);
+});
+
+
+
+const fs = require('fs');
+const path = require('path');
+
+const inputfileName = path.join(__dirname, 'big.file');
+const outputfileName = path.join(__dirname, 'big_copy.file');
+
+const config = {
+      encoding: 'UTF-8'
+}
+
+//Back pressure handling
+const readerStream = fs.createReadStream(inputfileName, config);
+const writeStr = fs.createWriteStream(outputfileName, config);
+
+//backPressure streams
+//pipe method is simplest method which wraps resume,pasuse,drain 
+readerStream.pipe(writeStr);
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+network programming : web programming ; http
+
+http module
+//node - we create web server, web app, and we deploy 
+const http = require('http');
+//http is duplex streaming module : read(request) and write(reponse)
+//in http every thing is object, which are created alredy , just we are using
+//http since stream, which has lot events.
+
+const { log } = console;
+const port = process.env.port || 3000
+
+//create server
+const server = http.createServer(function (req, res) {
+    //send response to client
+    res.write('hello Node web server!');
+    res.end();
+});
+
+
+//start server
+server.listen(port, function () {
+    log(`Server is listening at ${port}`)
+});
+
+//request event
+server.on('request', function (req, res) {
+    log(`${req.method} - ${req.url} `)
+});
+
+////////////////////////////////////////////////////////////////////////////////////////////
+sending json data to json
+
+//node - we create web server, web app, and we deploy 
+const http = require('http');
+const { findAllTodo } = require('./services/TodoService')
+//http is duplex streaming module : read(request) and write(reponse)
+//in http every thing is object, which are created alredy , just we are using
+//http since stream, which has lot events.
+
+const { log } = console;
+const port = process.env.port || 3000
+
+//create server
+const server = http.createServer(async function (req, res) {
+    // findAllTodo().then(todos => {
+    //     //convert toddos into json
+    //     const jsonTodos = JSON.stringify(todos)
+    //     res.writeHead(200, {
+    //         'Content-Type': 'application/json'
+    //     })
+    //     res.write(jsonTodos);
+    //     res.end();
+    // });
+    
+    const todos = await findAllTodo()
+    console.log('Hello')
+    const jsonTodos = JSON.stringify(todos)
+    res.writeHead(200, {
+        'Content-Type': 'application/json'
+    })
+    res.write(jsonTodos);
+    res.end();
+});
+
+
+//start server
+server.listen(port, function () {
+    log(`Server is listening at ${port}`)
+});
+
+//request event
+server.on('request', function (req, res) {
+    log(`${req.method} - ${req.url} `)
+});
+
+Tradtional web work flow
+
+Client-----request----------------WebServer--- thread--will io operation.
+Client-----request----------------WebServer----thread--will io operation.
+Client-----request----------------WebServer---thread-- will io operation.
+Client-----request----------------WebServer---thread-- will io operation.
+
+
+
+Non Blocking web model(Node.js):
+...............................
+
+Client-----request------WebServer built by node---|-            will io operation.
+Client-----request------WebServer built by node---|- libvu --os will io operation.
+Client-----request----- WebServer built by node---|-            will io operation.
+Client-----request----- WebServer built by node---|-            will io opeeration
+
+
+IS it possible to build real time web apps by using just pure http module alone?
+
+ Yes! but it is very complex
+
+node modules types
+1.custom module - discussed
+2.in built modules - disucssed
+3.third party modules - 
+
+
+Third party modules :
+ created by others , we are going to use them.
+ like libs,frameworks....
+
+
+Where is third moudles are located?
+what if i want to share my module to other developers?
+
+mvnrepository ==maven ==third party jar files
+
+https://www.npmjs.com/
+
+how to download third party modules into our application? How to push our module to this rep?
+
+javascript uses tool called "npm".
+
+node package manager:
+
+npm is tool is used to distribute node modules to others
+and you can get node modules from other others.
+
+npm tool is distributed along with node installation
+
+npm uses public repository server called npmjs.com npmjs.org
+
+tools and libs,frameworks all are distributed as node modules into repository.
+
+Java script application :
+
+Javascript Project Structure:(server side/ client side)
+.........................................................
+
+
+The project must have two things
+
+1.package.json file :
+   meta file which describes the project information
+2.node_modules folder
+   which contains libs/frameworks/tools code.
+
+create package.json file
+
+>npm init
+
+{
+  "name": "mynode-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
+
+npm is used
+
+to install,uninstall,publish node modules from node repo / into node repo.
+
+if you install third party modules , into your project, node distributes npm tool ,using this you can install,uninstall,upgrade node modules.
+
+
+
+npm syntax:
+
+npm commandName.
+
+node_modules : folder which can hold all javascript modules downloaded from repo.
+
+
+installing module:
+
+>npm install  moduleName  --options
+>npm i moduleName --options
+
+>npm install module 
+  here no option is told, means default is --save
+
+>npm i module
+
+options:
+ --save ; 
+ --save-dev
+ -g
+
+Development
+
+Production
+
+if you are installing any node module, you can tell, do you want to use only for development
+or development + production.
+
+Unit testing libs : Junit.jar===>java
+
+ --save = >    development + production
+ --save-dev => only for development
+
+Which code need not be used for production:
+
+1.All testing related  libs/frameworks - unit,e2s
+2.Tools like compilers,frameworks related code.
+
+Who will separate out this depedency(lib) for production/dev
+
+ Build tools -  webpack.
+ webpack will scan package.json---extracting prod depedencies
+
+Demo:
+....
+
+>npm install lodash --save 
+
+"dependencies": {
+    "lodash": "^4.17.15"
+  }
+
+any thing inside this depdenencies will be used in dev + production
+
+//
+const array = require('lodash/array'); //
+
+const list = [1, 2, 3];
+
+array.fill(list, 'a');
+console.log(list);
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Unit testing Env:
+
+->chai.js
+
+npm install chai --save-dev
+
+"devDependencies": {
+    "chai": "^4.2.0"
+  }
+
+any thing inside this depdenencies will be used in dev only
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+-g : global dependencies:
+..........................
+global package : package will be installed globally 
+ inside c drive.
+ looks like exe/bat files in windows
+
+global packages not used for development(coding)
+
+tools
+ ->build system
+ ->servers - webservers,testing servers
+ ->compilers : babel,tsc....
+
+Tool:
+
+Unit Testing Server:
+
+Mocha -server
+chai - for coding assertion lib
+
+
+npm install --global mocha
+npm install --g mocha
+
+C:\Users\sasub\AppData\Roaming\npm\mocha
+
+how to run mocha?
+
+test/hello.spec.js
+//Unit testing
+
+var assert = require('assert');
+describe('Array', function () {
+    describe('#indexOf()', function () {
+        it('should return -1 when the value is not present', function () {
+            assert.equal([1, 2, 3].indexOf(4), -1);
+        });
+    });
+});
+
+C:\session\ibm\mynode-app>mocha
+
+
+  Array
+    #indexOf()
+      √ should return -1 when the value is not present
+
+
+  1 passing (4ms)
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Automation: scripts;
+....................
+
+Problems with Global Modules:
+..............................
+
+1.version and compablity issue for new projects
+
+solution: 
+ install those golbal tools as local dev modules
+
+g vs --save-dev:
+
+global dependencies not good for multiple sharing projects
+install tools as project specific. --save-dev
+
+>npm i mocha --save-dev
+
+
+ single command trigger workflows
+
+ "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+
+
+"scripts": {
+    "commandName": "task to be automated"
+}
+
+commandname can be provided by npm called built in commands
+
+eg:
+start
+test
+postinstall
+preinstall
+
+custom commands also possible.
+
+"subu" : "node src/server.js"
+
+How to execute this command?
+
+incase built in command
+
+ >npm commandName
+ >npm test
+
+incase user defined command
+
+ >npm run commandName
+ >npm run subu
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+webpack : build system
+
+//es 6 module
+
+class WelcomeService {
+    constructor() {
+
+    }
+    sayHello() {
+        return 'hello'
+    }
+}
+export { WelcomeService };
+
+import { WelcomeService } from './services/WelcomeService';
+
+//create Object
+
+let service = new WelcomeService();
+console.log(service.sayHello());
+
+
+npm i webpack webpack-cli --save-dev
+
+webpack.config.js
+const path = require('path');
+
+module.exports = {
+    entry: './src/index.js',
+    mode: 'production',
+    output: {
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'bundle.js'
+    }
+};
+
+
+
+package.json
+{
+  "name": "mynode-app",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha",
+    "subu": "node src/index.js",
+    "build": "webpack"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "lodash": "^4.17.15"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^7.1.2",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11"
+  }
+}
+
+
 
 
 
