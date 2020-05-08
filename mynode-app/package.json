@@ -5,7 +5,7 @@
   "scripts": {
     "test": "mocha",
     "subu": "node src/index.js",
-    "build": "webpack"
+    "build": "webpack --watch"
   },
   "author": "",
   "license": "ISC",

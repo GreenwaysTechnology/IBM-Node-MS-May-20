@@ -5,7 +5,10 @@ class WelcomeService {
 
     }
     sayHello() {
-        return 'hello'
+        return 'hello node'
+    }
+    sayHai(){
+        return 'Hai node'
     }
 }
 export { WelcomeService };

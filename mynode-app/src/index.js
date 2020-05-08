@@ -4,3 +4,4 @@ import { WelcomeService } from './services/WelcomeService';
 
 let service = new WelcomeService();
 console.log(service.sayHello());
+console.log(service.sayHai());

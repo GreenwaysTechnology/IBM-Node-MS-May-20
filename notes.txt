@@ -3047,6 +3047,24 @@ incase user defined command
 
 webpack : build system
 
+
+module system in js:
+
+1.namespace
+2.amd
+......................................................................................
+3.cjs -------nativly supported by node
+    keywords: exports,module.exports,require
+
+4.es6 modules -- from ecma 6 onwards
+   keywords : export, export default,import  - not nativly supported by node,
+  so we need to convert these code into cjs 
+ who can do this? -  tools webpack.
+.......................................................................................
+5.system
+6.ums
+
+
 //es 6 module
 
 class WelcomeService {
@@ -3106,7 +3124,178 @@ package.json
     "webpack-cli": "^3.3.11"
   }
 }
+/////////////////////////////////////////////////////////////////////////////////////////////
 
+Web frameworks:
+
+Since core http module is not enough to build end to end realtime web applications.
+So we need frameworks.
+
+Frameworks in node : there are lot of framworks in the market.
+
+1.express.js : this is first framework from the node team.
+2.hapi.js
+3.loopback.js : IBM
+..........
+
+express.js:
+framework to build "RESTFull WebService" , Dynamic content generation web application.
+
+
+Express Key concepts: in express every thing object
+
+Objects in express
+
+1.Application
+  We call Container object which other objects
+  entry and exit of an application
+  application is created by calling function
+
+2.Request
+
+4.Response
+
+5.Router
+
+1.Application object roll:
+
+Routing HTTP requests; see for example, app.METHOD and app.param.
+Configuring middleware; see app.route.
+Rendering HTML views; see app.render.
+Registering a template engine; see app.engine.
+
+
+//express
+//get express function , when you call that function,
+//application created
+
+const express = require('express'); //return function 
+
+const { log } = console;
+const port = process.env.port || 3000
+
+//Create Application Object
+const app = express(); //function call 
+
+//REST End points 
+
+// /api/resource
+//GET --- /api/todos/list
+app.get('/api/todos/list', function (req, res) {
+    res.end('Todo Response');
+});
+
+
+
+app.listen(port, function () {
+    log(`Express Server is listening at ${port}`)
+});
+
+////////////////////////////////////////////////////////////////////////////////////////
+
+FrontController:
+
+
+Domains:
+
+1.todo
+2.users
+
+services
+const TODOS = require('../data/todos');
+
+
+class TodoService {
+    constructor() {
+    }
+    //sync api
+    // findAllTodo() {
+    //     return TODOS;
+    // }
+    //async code : with callbacks
+    // findAllTodo(callback) {
+    //     setTimeout(callback, 1000, TODOS)
+    // }
+
+    //async code : with promise
+    findAllTodo() {
+        return new Promise((resolve, reject) => {
+            //async
+           //any legacy async api with callback
+           setTimeout(resolve, 1000, TODOS)
+        })
+    }
+}
+module.exports = new TodoService();
+
+
+
+const USERS = require('../data/users');
+
+
+class UserService {
+    constructor() {
+    }
+    findAllUsers() {
+        return new Promise((resolve, reject) => {
+            setTimeout(resolve, 1000, USERS)
+        })
+    }
+}
+module.exports = new UserService();
+
+routers
+const express = require('express'); //return function 
+const { findAllTodo } = require('../services/TodoService');
+
+
+//create Router Object
+const todorouter = express.Router();
+//REST End points 
+// /api/resource
+//GET --- /api/todos/list
+
+todorouter.get('/list', async function (req, res) {
+    // res.end('Todo Response');
+    const TODOS = await findAllTodo()
+    res.json(TODOS);
+});
+//other end points
+
+module.exports = todorouter;
+
+const express = require('express'); //return function 
+const { findAllUsers } = require('../services/UserService');
+
+//create Router Object
+const userrouter = express.Router();
+//users end point
+userrouter.get('/list', async function (req, res) {
+    const USERS = await findAllUsers()
+    res.json(USERS);
+});
+module.exports = userrouter;
+
+//express
+//get express function , when you call that function,
+//application created
+const express = require('express'); //return function 
+const todorouter = require('./routers/todorouter');
+const userrouter = require('./routers/usersrouter');
+
+const { log } = console;
+const port = process.env.port || 3000
+
+//Create Application Object
+const app = express(); //function call 
+//Binding /Request forwarding to application controllers
+app.use('/api/todos', todorouter)
+app.use('/api/users', userrouter)
+
+
+app.listen(port, function () {
+    log(`Express Server is listening at ${port}`)
+});
 
 
 
