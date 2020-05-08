@@ -7,8 +7,7 @@ const todorouter = express.Router();
 //REST End points 
 // /api/resource
 //GET --- /api/todos/list
-
-todorouter.get('/api/todos/list', async function (req, res) {
+todorouter.get('/list', async function (req, res) {
     // res.end('Todo Response');
     const TODOS = await findAllTodo()
     res.json(TODOS);
